@@ -7,11 +7,22 @@ export const notFoundHandler = (req, _res, next) => {
 };
 
 export const errorHandler = (error, _req, res, _next) => {
-  const statusCode = error.statusCode || 500;
+  let statusCode = error.statusCode || 500;
+  let message = statusCode === 500 ? 'Internal server error' : error.message;
+
+  if (error.code === 'P2002') {
+    statusCode = 409;
+    message = 'A record with this value already exists';
+  }
+
+  if (error.code === 'P2025') {
+    statusCode = 404;
+    message = 'Requested resource was not found';
+  }
 
   const response = {
     success: false,
-    message: statusCode === 500 ? 'Internal server error' : error.message,
+    message,
   };
 
   if (error.details) {
